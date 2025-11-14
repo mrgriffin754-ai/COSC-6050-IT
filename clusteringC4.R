@@ -9,12 +9,12 @@ library(ggplot2)
 library(tidyr)
 library(htmltools)
 
-# ---- Map data ----
+# Map data
 geojson_path <- "C:/Users/User/Documents/wisconsin-with-county-boundaries_1132 (1).geojson"
 wi_counties <- st_read(geojson_path, quiet = TRUE) %>%
   mutate(county_name = name)
 
-# ---- RDS paths ----
+# paths 
 rds_paths_neg <- c(
   "2018" = "C:/Users/User/Documents/df2018_neg.rds",
   "2019" = "C:/Users/User/Documents/df2019_neg.rds",
@@ -23,7 +23,7 @@ rds_paths_neg <- c(
   "2022" = "C:/Users/User/Documents/df2022_neg.rds"
 )
 
-# ---- helpers ----
+# translators
 get_county_col <- function(df) {
   nms <- tolower(names(df))
   hit <- names(df)[nms %in% c("county", "countyname", "county_name")]
@@ -58,13 +58,12 @@ normalize_key <- function(x) {
   trimws(x)
 }
 
-# ============================================================
+
 # UI
-# ============================================================
 ui <- navbarPage(
   title = "WI County Clusters by Financial Traits",
   
-  # ---------------- Cluster Map ----------------
+  # Cluster Map
   tabPanel(
     "Cluster Map",
     sidebarLayout(
@@ -80,7 +79,7 @@ ui <- navbarPage(
     )
   ),
   
-  # ---------------- County Table ----------------
+  # County Table
   tabPanel(
     "County Table",
     sidebarLayout(
@@ -98,7 +97,7 @@ ui <- navbarPage(
     )
   ),
   
-  # ---------------- County Bar Charts ----------------
+  #County Bar Charts
   tabPanel(
     "County Bar Charts",
     sidebarLayout(
@@ -119,13 +118,9 @@ ui <- navbarPage(
     )
   )
 )
-
-# ============================================================
 # SERVER
-# ============================================================
 server <- function(input, output, session) {
-  
-  # ===================== MAP TAB =====================
+  #MAP TAB 
   raw_df_map <- reactive({
     path <- rds_paths_neg[[input$map_year]]
     if (file.exists(path)) readRDS(path) else NULL
@@ -214,7 +209,7 @@ server <- function(input, output, session) {
       addLegend("bottomright", pal = pal, values = ~Cluster, title = "Cluster")
   })
   
-  # ===================== TABLE TAB =====================
+  #TABLE TAB
   raw_df_tbl <- reactive({
     path <- rds_paths_neg[[input$tbl_year]]
     if (file.exists(path)) readRDS(path) else NULL
@@ -281,7 +276,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # ===================== BAR CHARTS TAB =====================
+  # BAR CHARTS TAB
   raw_df_bar <- reactive({
     path <- rds_paths_neg[[input$bar_year]]
     if (file.exists(path)) readRDS(path) else NULL
@@ -347,5 +342,6 @@ server <- function(input, output, session) {
     make_county_bar(agg, input$bar_county_2, input$bar_vars, input$bar_year)
   })
 }
+
 
 shinyApp(ui, server)
